@@ -1,9 +1,10 @@
 #!/bin/sh
 
-BOOT=/boot
-CMDLINE=cmdline.txt
-CMDLINE_RO=cmdline.txt.overlay
-CMDLINE_RW=cmdline.txt.orig
+BOOT="/boot/firmware"
+
+CMDLINE="cmdline.txt"
+CMDLINE_RO="cmdline.txt.overlay"
+CMDLINE_RW="cmdline.txt.orig"
 
 print_usage() {
 	cat <<-TEXT
@@ -20,7 +21,7 @@ print_usage() {
 [ "$1" = "--help" -o "$1" = "-h" ] && { print_usage; exit 0; }
 
 # Change to the working directory
-cd $BOOT
+cd "${BOOT}" || { echo "ERROR: BOOT not found: $BOOT" >&2 && exit 1; }
 
 # Check that the files we need are present and readable
 for file in $CMDLINE $CMDLINE_RO $CMDLINE_RW; do
@@ -58,13 +59,11 @@ fi
 
 check_permission() {
 	# Check that we are running as root
-	[ $(id -u) -eq 0 ] || { echo "ERROR: requires root privileges" >&2; exit 1; }
+	[ "$(id -u)" -eq 0 ] || { echo "ERROR: requires root privileges" >&2; exit 1; }
 
 	# Check that we can write to CMDLINE, otherwise try to remount BOOT
 	if ! touch $CMDLINE 2>/dev/null; then
-		mount -o remount,rw $BOOT 2>/dev/null
-		[ $? -eq 0 ] || { echo "ERROR: failed to mount $BOOT RW" >&2; exit 1; }
-		boot_remount=y
+	  echo "ERROR: Cannot write to $(pwd)/$CMDLINE" >&2; exit 1;
 	fi
 
 	return 0
@@ -97,12 +96,3 @@ elif [ "$state" = "RW" ]; then
 fi
 
 echo "/ will be mounted $newstate on next boot" >&2
-
-# Remount BOOT read-only if that was the way we found it
-if [ "$boot_remount" = "y" ]; then
-	mount -o remount,ro $BOOT 2>/dev/null
-	[ $? -eq 0 ] || { echo "failed to mount $BOOT RO" >&2; exit 1; }
-fi
-
-# The End
-exit 0
