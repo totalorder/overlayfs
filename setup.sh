@@ -24,6 +24,7 @@ update-initramfs -c -k "$(uname -r)"
 # TODO: Useful commands for debugging
 # sudo update-initramfs -c -k "$(uname -r)" && sudo reboot now
 # sudo less /etc/initramfs-tools/scripts/overlay
+# echo " debug" | sudo tee /boot/firmware/cmdline.txt
 # sudo less /run/initramfs/initramfs.debug
 
 # Backup current cmdline.txt

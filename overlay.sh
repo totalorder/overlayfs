@@ -72,4 +72,8 @@ local_mount_root()
 	# Make /persistent R/W
 	mount -o bind /lower/persistent ${rootmnt}/persistent
 	mount -o remount,rw ${rootmnt}/persistent
+
+	# Make /etc/netplan R/W
+	mount -o bind /lower/etc/netplan ${rootmnt}/etc/netplan
+	mount -o remount,rw ${rootmnt}/etc/netplan
 }
